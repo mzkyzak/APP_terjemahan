@@ -1,11 +1,13 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'animated_border.dart';
 
 class TranslationResult extends StatelessWidget {
   final String text;
   final String languageName;
   final String languageFlag;
   final VoidCallback onCopy;
+  final VoidCallback onSpeak;
+  final bool isSpeaking;
 
   const TranslationResult({
     super.key,
@@ -13,6 +15,8 @@ class TranslationResult extends StatelessWidget {
     required this.languageName,
     required this.languageFlag,
     required this.onCopy,
+    required this.onSpeak,
+    required this.isSpeaking,
   });
 
   @override
@@ -21,122 +25,137 @@ class TranslationResult extends StatelessWidget {
 
     final isError = text.contains("Terjadi kesalahan");
 
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.only(top: 25),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(30),
-        boxShadow: [
-          BoxShadow(
-            color: isError
-                ? Colors.red.withOpacity(0.15)
-                : const Color(0xFF6366F1).withOpacity(0.2),
-            blurRadius: 25,
-            offset: const Offset(0, 12),
+    return AnimatedBorderContainer(
+      borderRadius: 28,
+      borderWidth: 2.0,
+      colors: isError
+          ? const [Color(0xFFEF4444), Color(0xFFDC2626), Color(0xFFF87171)]
+          : const [Color(0xFF2563EB), Color(0xFFEF4444), Color(0xFF38BDF8)],
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(22.0),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: isError
+                ? [
+                    const Color(0xFF7F1D1D),
+                    const Color(0xFF991B1B),
+                  ]
+                : [
+                    const Color(0xFF1E293B),
+                    const Color(0xFF0F172A),
+                  ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(30),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-          child: Container(
-            padding: const EdgeInsets.all(24.0),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: isError
-                    ? [
-                        Colors.red.shade50.withOpacity(0.7),
-                        Colors.red.shade100.withOpacity(0.5),
-                      ]
-                    : [
-                        const Color(0xFFF5F3FF).withOpacity(0.8),
-                        const Color(0xFFEDE9FE).withOpacity(0.6),
-                      ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(30),
-              border: Border.all(
-                color: isError
-                    ? Colors.red.shade200.withOpacity(0.5)
-                    : const Color(0xFFDDD6FE).withOpacity(0.5),
-                width: 1.5,
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.6),
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
-                            blurRadius: 4,
-                            offset: const Offset(0, 2),
+          borderRadius: BorderRadius.circular(26),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
                           ),
-                        ],
-                      ),
-                      child: Row(
-                        children: [
-                          Text(languageFlag, style: const TextStyle(fontSize: 16)),
-                          const SizedBox(width: 8),
-                          Text(
-                            languageName,
-                            style: TextStyle(
-                              fontWeight: FontWeight.w900,
-                              color: isError ? Colors.red.shade700 : const Color(0xFF5B21B6),
-                              fontSize: 12,
-                              letterSpacing: 1,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const Spacer(),
-                    if (!isError)
-                      Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          onTap: onCopy,
-                          borderRadius: BorderRadius.circular(15),
-                          child: Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.4),
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.copy_all_rounded,
-                              size: 20,
-                              color: Color(0xFF5B21B6),
-                            ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(languageFlag, style: const TextStyle(fontSize: 18)),
+                              const SizedBox(width: 8),
+                              Flexible(
+                                child: Text(
+                                  languageName.toUpperCase(),
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w900,
+                                    color: isError ? const Color(0xFFFCA5A5) : const Color(0xFFC7D2FE),
+                                    fontSize: 12,
+                                    letterSpacing: 1.2,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                SelectableText(
-                  text,
-                  style: TextStyle(
-                    fontSize: 20,
-                    height: 1.6,
-                    fontWeight: FontWeight.w600,
-                    color: isError ? Colors.red.shade900 : const Color(0xFF1E1B4B),
-                    letterSpacing: 0.2,
+                      const SizedBox(width: 8),
+                      const Spacer(),
+                      if (!isError) ...[
+                        // Tombol Suara (Text to Speech)
+                        Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            onTap: onSpeak,
+                            borderRadius: BorderRadius.circular(14),
+                            child: Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: isSpeaking
+                                    ? const Color(0xFF818CF8).withValues(alpha: 0.35)
+                                    : Colors.white.withValues(alpha: 0.1),
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: isSpeaking
+                                      ? const Color(0xFF818CF8)
+                                      : Colors.white.withValues(alpha: 0.2),
+                                ),
+                              ),
+                              child: Icon(
+                                isSpeaking ? Icons.volume_up_rounded : Icons.volume_mute_rounded,
+                                size: 18,
+                                color: isSpeaking ? const Color(0xFFA5B4FC) : Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        // Tombol Salin
+                        Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            onTap: onCopy,
+                            borderRadius: BorderRadius.circular(14),
+                            child: Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.1),
+                                shape: BoxShape.circle,
+                                border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+                              ),
+                              child: const Icon(
+                                Icons.copy_rounded,
+                                size: 18,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
-                ),
-              ],
+                  const SizedBox(height: 18),
+                  SelectableText(
+                    text,
+                    style: TextStyle(
+                      fontSize: 19,
+                      height: 1.5,
+                      fontWeight: FontWeight.w600,
+                      color: isError ? const Color(0xFFFECACA) : Colors.white,
+                      letterSpacing: 0.3,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ),
-      ),
     );
   }
 }
+
+
